@@ -1,0 +1,32 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate Python syntax
+        run: |
+          python -m py_compile config.py
+          python -m py_compile api/run.py
+          python -m py_compile modules/stock.py
+          python -m py_compile modules/news.py
+          python -m py_compile modules/ai_briefing.py
+          python -m py_compile modules/slack.py
+
+      - name: Trigger Vercel Deploy
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
