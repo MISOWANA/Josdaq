@@ -20,6 +20,9 @@ def get_stock_info(ticker: str) -> dict:
     post_price = info.get("postMarketPrice")
     post_change_pct = info.get("postMarketChangePercent")
 
+    short_pct = info.get("shortPercentOfFloat")
+    short_ratio = info.get("shortRatio")
+
     result = {
         "ticker": ticker,
         "name": info.get("shortName", ticker),
@@ -27,6 +30,8 @@ def get_stock_info(ticker: str) -> dict:
         "prev_close": round(prev_close, 2),
         "change": round(change, 2),
         "change_pct": round(change_pct, 2),
+        "short_pct": round(short_pct * 100, 2) if short_pct else None,
+        "short_ratio": round(short_ratio, 1) if short_ratio else None,
     }
 
     if post_price:
