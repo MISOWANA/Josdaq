@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY", "")
-KAKAO_REFRESH_TOKEN = os.getenv("KAKAO_REFRESH_TOKEN", "")
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
 STOCKS = [s.strip() for s in os.getenv("STOCKS", "NVDA").split(",") if s.strip()]
 

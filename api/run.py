@@ -10,7 +10,7 @@ from config import STOCKS
 from modules.stock import get_all_stocks
 from modules.news import fetch_all_news
 from modules.ai_briefing import build_briefing
-from modules.kakao import send_to_me
+from modules.slack import send_message
 
 KST = pytz.timezone("Asia/Seoul")
 
@@ -23,7 +23,7 @@ class handler(BaseHTTPRequestHandler):
             news = fetch_all_news(STOCKS)
             briefing = build_briefing(stocks, news)
             message = f"📊 주식 브리핑 {now}\n{'─' * 30}\n{briefing}"
-            send_to_me(message)
+            send_message(message)
 
             self.send_response(200)
             self.send_header("Content-type", "text/plain; charset=utf-8")
