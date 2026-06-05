@@ -1,0 +1,13 @@
+{
+  "crons": [
+    {
+      "path": "/api/run",
+      "schedule": "0 22 * * *"
+    }
+  ],
+  "functions": {
+    "api/run.py": {
+      "maxDuration": 60
+    }
+  }
+}
