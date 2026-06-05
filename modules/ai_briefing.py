@@ -23,7 +23,7 @@ def build_briefing(stocks: list[dict], news: dict) -> str:
 - 숫자는 구체적으로 표기
 - 이모지 사용 가능 (가독성 향상)
 - 말투: 간결하고 전문적으로
-- 한자(漢字) 절대 사용 금지, 순수 한글로만 작성
+- [언어 규칙 - 반드시 준수] 출력 텍스트는 순수 한글, 영문, 숫자, 특수문자만 사용하세요. 한자(漢字)는 단 한 글자도 사용 금지입니다. 株, 価, 場, 証, 業, 率, 益, 損, 額, 高, 低, 落, 騰 등 어떤 한자도 절대 출력하지 마세요. 한자가 필요한 단어는 반드시 한글로 바꿔 쓰세요.
 
 브리핑을 작성해주세요:"""
 
@@ -42,10 +42,17 @@ def _format_stocks_for_prompt(stocks: list[dict]) -> str:
             lines.append(f"{s['ticker']}: 데이터 오류")
             continue
         sign = "+" if s["change"] >= 0 else ""
-        lines.append(
-            f"{s['name']} ({s['ticker']}): ${s['current']} "
-            f"({sign}{s['change_pct']}%)"
+        line = (
+            f"{s['name']} ({s['ticker']}): "
+            f"정규장 종가 ${s['regular_close']} ({sign}{s['change_pct']}%)"
         )
+        if s.get("post_price"):
+            post_sign = "+" if (s.get("post_change_pct") or 0) >= 0 else ""
+            post_info = f"  애프터 현재가 ${s['post_price']}"
+            if s.get("post_change_pct") is not None:
+                post_info += f" ({post_sign}{s['post_change_pct']}%)"
+            line += f"\n{post_info}"
+        lines.append(line)
     return "\n".join(lines)
 
 

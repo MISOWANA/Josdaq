@@ -1,5 +1,4 @@
 import yfinance as yf
-from datetime import datetime
 import pytz
 
 KST = pytz.timezone("Asia/Seoul")
@@ -8,26 +7,33 @@ KST = pytz.timezone("Asia/Seoul")
 def get_stock_info(ticker: str) -> dict:
     stock = yf.Ticker(ticker)
     info = stock.info
-    hist = stock.history(period="2d")
 
-    if hist.empty or len(hist) < 2:
+    regular_close = info.get("regularMarketPrice") or info.get("previousClose")
+    prev_close = info.get("regularMarketPreviousClose") or info.get("previousClose")
+
+    if not regular_close or not prev_close:
         return {"ticker": ticker, "error": "데이터 없음"}
 
-    prev_close = hist["Close"].iloc[-2]
-    current = hist["Close"].iloc[-1]
-    change = current - prev_close
+    change = regular_close - prev_close
     change_pct = (change / prev_close) * 100
 
-    return {
+    post_price = info.get("postMarketPrice")
+    post_change_pct = info.get("postMarketChangePercent")
+
+    result = {
         "ticker": ticker,
         "name": info.get("shortName", ticker),
-        "current": round(current, 2),
+        "regular_close": round(regular_close, 2),
         "prev_close": round(prev_close, 2),
         "change": round(change, 2),
         "change_pct": round(change_pct, 2),
-        "volume": info.get("volume", 0),
-        "market_cap": info.get("marketCap", 0),
     }
+
+    if post_price:
+        result["post_price"] = round(post_price, 2)
+        result["post_change_pct"] = round(post_change_pct * 100, 2) if post_change_pct else None
+
+    return result
 
 
 def get_all_stocks(tickers: list[str]) -> list[dict]:
@@ -38,18 +44,3 @@ def get_all_stocks(tickers: list[str]) -> list[dict]:
         except Exception as e:
             results.append({"ticker": ticker, "error": str(e)})
     return results
-
-
-def format_stock_summary(stocks: list[dict]) -> str:
-    lines = []
-    for s in stocks:
-        if "error" in s:
-            lines.append(f"• {s['ticker']}: 오류 ({s['error']})")
-            continue
-        arrow = "▲" if s["change"] >= 0 else "▼"
-        sign = "+" if s["change"] >= 0 else ""
-        lines.append(
-            f"• {s['name']} ({s['ticker']})\n"
-            f"  ${s['current']} {arrow} {sign}{s['change']} ({sign}{s['change_pct']}%)"
-        )
-    return "\n".join(lines)
